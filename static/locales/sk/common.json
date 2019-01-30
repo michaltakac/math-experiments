@@ -1,0 +1,19 @@
+{
+  "minimize-panel": "Minimalizovať panel",
+  "maximize-panel": "Maximalizovať panel",
+  "language": "Jazyk",
+  "multiple-expression-title": "Matematický Projekt - Experimenty s Reactom, Mathboxom and Next.js",
+  "function": "Funkcia",
+  "add-function": "Pridať funkciu",
+  "change-locale": "Zmeniť jazyk",
+  "show-panel": "Rozbaliť",
+  "hide-panel": "Skryť",
+  "label": "Popis",
+  "label-placeholder": "napr. 'Dôležitá funkcia'",
+  "show-grid": "Zapnúť mriežku?",
+  "fov": "Zorné pole (field of view) [°]",
+  "grid-width": "Hrúbka mriežky",
+  "visible": "Zobraziť",
+  "opacity": "Priehľadnosť",
+  "draw-function": "Vykresli funkciu"
+}

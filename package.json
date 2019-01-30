@@ -1,0 +1,34 @@
+{
+  "name": "math-experiments",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Experimenting with using React, Mathbox and Next.js",
+  "main": "index.js",
+  "scripts": {
+    "start": "NODE_ENV=production node server.js",
+    "dev": "node server.js",
+    "build": "next build",
+    "export": "npm run build && next export"
+  },
+  "keywords": [
+    "mathbox",
+    "react",
+    "math"
+  ],
+  "author": "Michal Takac <takacmichal92@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "constate": "^1.0.0-alpha.7",
+    "express": "^4.16.4",
+    "katex": "^0.10.0",
+    "mathjs": "^5.4.1",
+    "next": "^7.0.2",
+    "next-i18next": "^0.23.2",
+    "react": "^16.8.0-alpha.1",
+    "react-color": "^2.17.0",
+    "react-dom": "^16.8.0-alpha.1",
+    "react-katex": "^2.0.2",
+    "reactstrap": "^7.1.0",
+    "uuid": "^3.3.2"
+  }
+}

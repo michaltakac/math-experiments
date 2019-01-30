@@ -1,0 +1,12 @@
+node_modules/
+node_modules/
+.next/
+npm-debug.log
+**/*.log
+.DS_Store
+dist
+dist
+out
+
+.idea
+coverage

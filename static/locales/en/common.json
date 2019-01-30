@@ -1,0 +1,19 @@
+{
+  "minimize-panel": "Minimize panel",
+  "maximize-panel": "Maximize panel",
+  "language": "Language",
+  "multiple-expression-title": "Math Project - Experiments with React, Mathbox and Next.js",
+  "function": "Function",
+  "add-function": "Add function",
+  "change-locale": "Change language",
+  "show-panel": "Show",
+  "hide-panel": "Hide",
+  "label": "Label",
+  "label-placeholder": "e.g. 'Some function'",
+  "show-grid": "Show grid?",
+  "fov": "Field of view [°]",
+  "grid-width": "Grid width",
+  "visible": "Visible",
+  "opacity": "Opacity",
+  "draw-function": "Draw function"
+}
