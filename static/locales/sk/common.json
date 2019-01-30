@@ -15,5 +15,8 @@
   "grid-width": "Hrúbka mriežky",
   "visible": "Zobraziť",
   "opacity": "Priehľadnosť",
-  "draw-function": "Vykresli funkciu"
+  "draw-function": "Vykresli funkciu",
+  "show-x-scale-numbers": "Zobraziť čísla na osi X",
+  "show-y-scale-numbers": "Zobraziť čísla na osi Y",
+  "show-z-scale-numbers": "Zobraziť čísla na osi Z"
 }

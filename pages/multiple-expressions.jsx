@@ -13,15 +13,18 @@ import { i18n, withNamespaces } from "../i18n";
 
 class Page extends React.Component {
   state = {
-    xMin: -4,
-    xMax: 4,
-    yMin: -12,
-    yMax: 12,
-    zMin: -4,
-    zMax: 4,
+    xMin: -10,
+    xMax: 10,
+    yMin: -10,
+    yMax: 10,
+    zMin: -20,
+    zMax: 20,
     gridVisible: true,
     gridWidth: 1,
     fov: 90,
+    showXScale: true,
+    showYScale: true,
+    showZScale: true,
     functions: new Set()
   };
 
@@ -56,7 +59,13 @@ class Page extends React.Component {
       z: new THREE.Color(0x0074d9)
     };
 
-    initScene(colors, { range: [[-10, 10], [-20, 20], [-10, 10]] });
+    initScene(colors, {
+      range: [
+        [this.state.xMin, this.state.xMax],
+        [this.state.zMin, this.state.zMax],
+        [this.state.yMin, this.state.yMax]
+      ]
+    });
   }
 
   addFunction = () => {
@@ -128,14 +137,56 @@ class Page extends React.Component {
               </div>
               <Checkbox
                 text={t("show-grid")}
-                onChange={e => {
-                  this.setState({ gridVisible: e.target.checked });
-                  Mathbox.select("grid").set(
-                    "opacity",
-                    this.state.gridVisible ? 1 : 0
-                  );
+                onChange={() => {
+                  this.setState(prevState => {
+                    const isChecked = !prevState.gridVisible;
+                    Mathbox.select("grid").set("opacity", isChecked ? 1 : 0);
+                    return { gridVisible: isChecked };
+                  });
                 }}
                 checked={this.state.gridVisible}
+              />
+              <Checkbox
+                text={t("show-x-scale-numbers")}
+                onChange={() => {
+                  this.setState(prevState => {
+                    const isChecked = !prevState.showXScale;
+                    Mathbox.select("#axis-x-label").set(
+                      "opacity",
+                      isChecked ? 1 : 0
+                    );
+                    return { showXScale: isChecked };
+                  });
+                }}
+                checked={this.state.showXScale}
+              />
+              <Checkbox
+                text={t("show-y-scale-numbers")}
+                onChange={() => {
+                  this.setState(prevState => {
+                    const isChecked = !prevState.showYScale;
+                    Mathbox.select("#axis-y-label").set(
+                      "opacity",
+                      isChecked ? 1 : 0
+                    );
+                    return { showYScale: isChecked };
+                  });
+                }}
+                checked={this.state.showYScale}
+              />
+              <Checkbox
+                text={t("show-z-scale-numbers")}
+                onChange={() => {
+                  this.setState(prevState => {
+                    const isChecked = !prevState.showZScale;
+                    Mathbox.select("#axis-z-label").set(
+                      "opacity",
+                      isChecked ? 1 : 0
+                    );
+                    return { showZScale: isChecked };
+                  });
+                }}
+                checked={this.state.showZScale}
               />
               <Slider
                 text={t("fov")}
@@ -172,8 +223,33 @@ class Page extends React.Component {
                   this.setState({ xMin: parseFloat(e.target.value) });
                   Mathbox.select("cartesian").set("range", [
                     [this.state.xMin, this.state.xMax],
-                    [this.state.yMin, this.state.yMax],
-                    [this.state.zMin, this.state.zMax]
+                    [this.state.zMin, this.state.zMax],
+                    [this.state.yMin, this.state.yMax]
+                  ]);
+                  Mathbox.select("grid").set("rangeX", [
+                    this.state.xMin,
+                    this.state.xMax
+                  ]);
+                  Mathbox.select("grid").set("rangeY", [
+                    this.state.yMin,
+                    this.state.yMax
+                  ]);
+                  Mathbox.select("#axis-x").set("range", [
+                    this.state.xMin,
+                    this.state.xMax
+                  ]);
+                  Mathbox.select("#axis-y").set("range", [
+                    this.state.yMin,
+                    this.state.yMax
+                  ]);
+                  Mathbox.select("#axis-z").set("range", [
+                    this.state.zMin,
+                    this.state.zMax
+                  ]);
+                  Mathbox.select("#axis-labels").set("data", [
+                    [this.state.xMax + 0.5, 0, 0],
+                    [0, this.state.zMax + 0.5, 0],
+                    [0, 0, this.state.yMax + 0.5]
                   ]);
                 }}
               />
@@ -187,8 +263,33 @@ class Page extends React.Component {
                   this.setState({ xMax: parseFloat(e.target.value) });
                   Mathbox.select("cartesian").set("range", [
                     [this.state.xMin, this.state.xMax],
-                    [this.state.yMin, this.state.yMax],
-                    [this.state.zMin, this.state.zMax]
+                    [this.state.zMin, this.state.zMax],
+                    [this.state.yMin, this.state.yMax]
+                  ]);
+                  Mathbox.select("grid").set("rangeX", [
+                    this.state.xMin,
+                    this.state.xMax
+                  ]);
+                  Mathbox.select("grid").set("rangeY", [
+                    this.state.yMin,
+                    this.state.yMax
+                  ]);
+                  Mathbox.select("#axis-x").set("range", [
+                    this.state.xMin,
+                    this.state.xMax
+                  ]);
+                  Mathbox.select("#axis-y").set("range", [
+                    this.state.yMin,
+                    this.state.yMax
+                  ]);
+                  Mathbox.select("#axis-z").set("range", [
+                    this.state.zMin,
+                    this.state.zMax
+                  ]);
+                  Mathbox.select("#axis-labels").set("data", [
+                    [this.state.xMax + 0.5, 0, 0],
+                    [0, this.state.zMax + 0.5, 0],
+                    [0, 0, this.state.yMax + 0.5]
                   ]);
                 }}
               />
@@ -202,8 +303,33 @@ class Page extends React.Component {
                   this.setState({ yMin: parseFloat(e.target.value) });
                   Mathbox.select("cartesian").set("range", [
                     [this.state.xMin, this.state.xMax],
-                    [this.state.yMin, this.state.yMax],
-                    [this.state.zMin, this.state.zMax]
+                    [this.state.zMin, this.state.zMax],
+                    [this.state.yMin, this.state.yMax]
+                  ]);
+                  Mathbox.select("grid").set("rangeX", [
+                    this.state.xMin,
+                    this.state.xMax
+                  ]);
+                  Mathbox.select("grid").set("rangeY", [
+                    this.state.yMin,
+                    this.state.yMax
+                  ]);
+                  Mathbox.select("#axis-x").set("range", [
+                    this.state.xMin,
+                    this.state.xMax
+                  ]);
+                  Mathbox.select("#axis-y").set("range", [
+                    this.state.yMin,
+                    this.state.yMax
+                  ]);
+                  Mathbox.select("#axis-z").set("range", [
+                    this.state.zMin,
+                    this.state.zMax
+                  ]);
+                  Mathbox.select("#axis-labels").set("data", [
+                    [this.state.xMax + 0.5, 0, 0],
+                    [0, this.state.zMax + 0.5, 0],
+                    [0, 0, this.state.yMax + 0.5]
                   ]);
                 }}
               />
@@ -217,8 +343,33 @@ class Page extends React.Component {
                   this.setState({ yMax: parseFloat(e.target.value) });
                   Mathbox.select("cartesian").set("range", [
                     [this.state.xMin, this.state.xMax],
-                    [this.state.yMin, this.state.yMax],
-                    [this.state.zMin, this.state.zMax]
+                    [this.state.zMin, this.state.zMax],
+                    [this.state.yMin, this.state.yMax]
+                  ]);
+                  Mathbox.select("grid").set("rangeX", [
+                    this.state.xMin,
+                    this.state.xMax
+                  ]);
+                  Mathbox.select("grid").set("rangeY", [
+                    this.state.yMin,
+                    this.state.yMax
+                  ]);
+                  Mathbox.select("#axis-x").set("range", [
+                    this.state.xMin,
+                    this.state.xMax
+                  ]);
+                  Mathbox.select("#axis-y").set("range", [
+                    this.state.yMin,
+                    this.state.yMax
+                  ]);
+                  Mathbox.select("#axis-z").set("range", [
+                    this.state.zMin,
+                    this.state.zMax
+                  ]);
+                  Mathbox.select("#axis-labels").set("data", [
+                    [this.state.xMax + 0.5, 0, 0],
+                    [0, this.state.zMax + 0.5, 0],
+                    [0, 0, this.state.yMax + 0.5]
                   ]);
                 }}
               />
@@ -232,8 +383,33 @@ class Page extends React.Component {
                   this.setState({ zMin: parseFloat(e.target.value) });
                   Mathbox.select("cartesian").set("range", [
                     [this.state.xMin, this.state.xMax],
-                    [this.state.yMin, this.state.yMax],
-                    [this.state.zMin, this.state.zMax]
+                    [this.state.zMin, this.state.zMax],
+                    [this.state.yMin, this.state.yMax]
+                  ]);
+                  Mathbox.select("grid").set("rangeX", [
+                    this.state.xMin,
+                    this.state.xMax
+                  ]);
+                  Mathbox.select("grid").set("rangeY", [
+                    this.state.yMin,
+                    this.state.yMax
+                  ]);
+                  Mathbox.select("#axis-x").set("range", [
+                    this.state.xMin,
+                    this.state.xMax
+                  ]);
+                  Mathbox.select("#axis-y").set("range", [
+                    this.state.yMin,
+                    this.state.yMax
+                  ]);
+                  Mathbox.select("#axis-z").set("range", [
+                    this.state.zMin,
+                    this.state.zMax
+                  ]);
+                  Mathbox.select("#axis-labels").set("data", [
+                    [this.state.xMax + 0.5, 0, 0],
+                    [0, this.state.zMax + 0.5, 0],
+                    [0, 0, this.state.yMax + 0.5]
                   ]);
                 }}
               />
@@ -247,8 +423,33 @@ class Page extends React.Component {
                   this.setState({ zMax: parseFloat(e.target.value) });
                   Mathbox.select("cartesian").set("range", [
                     [this.state.xMin, this.state.xMax],
-                    [this.state.yMin, this.state.yMax],
-                    [this.state.zMin, this.state.zMax]
+                    [this.state.zMin, this.state.zMax],
+                    [this.state.yMin, this.state.yMax]
+                  ]);
+                  Mathbox.select("grid").set("rangeX", [
+                    this.state.xMin,
+                    this.state.xMax
+                  ]);
+                  Mathbox.select("grid").set("rangeY", [
+                    this.state.yMin,
+                    this.state.yMax
+                  ]);
+                  Mathbox.select("#axis-x").set("range", [
+                    this.state.xMin,
+                    this.state.xMax
+                  ]);
+                  Mathbox.select("#axis-y").set("range", [
+                    this.state.yMin,
+                    this.state.yMax
+                  ]);
+                  Mathbox.select("#axis-z").set("range", [
+                    this.state.zMin,
+                    this.state.zMax
+                  ]);
+                  Mathbox.select("#axis-labels").set("data", [
+                    [this.state.xMax + 0.5, 0, 0],
+                    [0, this.state.zMax + 0.5, 0],
+                    [0, 0, this.state.yMax + 0.5]
                   ]);
                 }}
               />

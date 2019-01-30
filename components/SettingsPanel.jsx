@@ -118,33 +118,34 @@ function SettingsPanel({ functionIds, t, onRemove }) {
   return (
     <ListGroupItem>
       <ListGroupItemHeading>
-        {settings.label ? (
-          settings.label
-        ) : (
-          <InlineMath>{toTex(settings.expression)}</InlineMath>
-        )}
+        <h3 className="mb-3 float-left">
+          {settings.label ? (
+            settings.label
+          ) : (
+            <InlineMath>{toTex(settings.expression)}</InlineMath>
+          )}
+        </h3>
         <div className="float-right">
           <button
             type="button"
-            className="btn btn-primary btn-sm"
+            className="btn btn-primary btn-lg"
             onClick={() => update({ panelOpen: !settings.panelOpen })}
           >
             {settings.panelOpen ? t("hide-panel") : t("show-panel")}
           </button>
           <button
             type="button"
-            className="btn btn-danger btn-sm"
+            className="btn btn-danger btn-lg"
             onClick={() => {
               onRemove(settings.id);
             }}
           >
-            <span class="glyphicon glyphicon-remove" />
+            <span className="glyphicon glyphicon-remove" />
           </button>
         </div>
       </ListGroupItemHeading>
       <Collapse isOpen={settings.panelOpen}>
         <ExpressionForm
-          label={settings.label}
           value={settings.expression}
           onChange={e =>
             update({

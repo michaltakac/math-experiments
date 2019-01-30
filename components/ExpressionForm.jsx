@@ -5,7 +5,7 @@ function ExpressionForm({ t, id, onSubmit, label, onChange, value }) {
   return (
     <form onSubmit={onSubmit}>
       <div className="form-group">
-        <label htmlFor={`expr-input-${id}`}>Funkcia: {label}</label>
+        {label && <label htmlFor={`expr-input-${id}`}>{label}</label>}
         <input
           className="form-control"
           id={`expr-input-${id}`}

@@ -36,18 +36,58 @@ export function initScene(colors, opts) {
   Scene = Mathbox.cartesian(options);
 
   //////// Axis initialization
-  Scene.axis({
-    axis: 1,
-    color: colors.x
-  });
-  Scene.axis({
-    axis: 2, // "y" also works
-    color: colors.z
-  });
-  Scene.axis({
-    axis: 3,
-    color: colors.y
-  });
+  Scene.axis({ id: "axis-x", axis: 1, color: colors.x })
+    .scale({ axis: 1, divide: 10 })
+    .ticks({ width: 3, size: 15, color: colors.x })
+    .format({ digits: 3, weight: "normal" })
+    .label({
+      id: "axis-x-label",
+      size: 13,
+      blending: "no",
+      color: "black"
+    });
+
+  Scene.axis({ id: "axis-z", axis: 2, color: colors.z })
+    .scale({
+      axis: 2,
+      divide: 10
+    })
+    .ticks({
+      width: 3,
+      size: 15,
+      color: colors.z
+    })
+    .format({
+      digits: 3,
+      weight: "normal"
+    })
+    .label({
+      id: "axis-z-label",
+      size: 13,
+      blending: "no",
+      color: "black"
+    });
+
+  Scene.axis({ id: "axis-y", axis: 3, color: colors.y })
+    .scale({
+      axis: 3,
+      divide: 10
+    })
+    .ticks({
+      width: 3,
+      size: 15,
+      color: colors.y
+    })
+    .format({
+      digits: 3,
+      weight: "normal"
+    })
+    .label({
+      id: "axis-y-label",
+      size: 13,
+      blending: "no",
+      color: "black"
+    });
 
   Mathbox.select("axis")
     .set("end", true)
@@ -64,9 +104,12 @@ export function initScene(colors, opts) {
   ///////// Grid initialization
   Scene.grid({
     axes: [1, 3],
+    rangeX: [options.range[0][0], options.range[0][1]],
+    rangeY: [options.range[2][0], options.range[2][1]],
     width: 1,
     color: 0xb0b0b0,
-    depth: 0.25
+    depth: 1,
+    endX: false
   });
 
   Scene.array({
@@ -95,7 +138,7 @@ export function calculateFn(expr) {
   }
 
   return function(emit, x, y, i, j) {
-    const computedVal = computeFn(parsedFn, { x, y });
+    const computedVal = computeFn(parsedFn, { x, y, i, j });
     emit(x, computedVal, y);
   };
 }

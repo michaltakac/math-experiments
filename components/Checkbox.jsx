@@ -4,7 +4,8 @@ export function Checkbox({ checked, onChange, text }) {
   return (
     <div>
       <p>
-        {text} <input type="checkbox" onChange={onChange} checked={checked} />
+        {text}{" "}
+        <input type="checkbox" onChange={onChange} defaultChecked={checked} />
       </p>
     </div>
   );
