@@ -4,11 +4,19 @@ import uuidv4 from "uuid/v4";
 import { ChromePicker } from "react-color";
 import { Collapse, ListGroupItemHeading, ListGroupItem } from "reactstrap";
 import { InlineMath } from "react-katex";
-import { Mathbox, calculateFn, Scene, toTex } from "../common/mathbox";
+import {
+  Mathbox,
+  calculateFn,
+  Scene,
+  toTex,
+  derivate,
+  fnCache
+} from "../common/mathbox";
 import { Checkbox } from "./Checkbox";
 import { Slider } from "./Slider";
 import { TextInput } from "./TextInput";
 import ExpressionForm from "./ExpressionForm";
+import { Dropdown } from "./Dropdown";
 
 import { withNamespaces } from "../i18n";
 
@@ -31,6 +39,9 @@ export const INITIAL_STATE = {
   rangeXMax: 4,
   rangeYMin: -4,
   rangeYMax: 4,
+  lineX: false,
+  lineY: false,
+  blendingMode: "normal",
   expression: "x^2 + y^2",
   id: uuidv4(),
   label: "",
@@ -59,15 +70,31 @@ function useFunctionSettings({ initialSettings }) {
     updateSettings({ ...settings, opacity });
     Mathbox.select(`#surface-${settings.id}`).set("opacity", opacity);
   };
-  return { settings, update, setColor, setVisibility, setOpacity };
+  const setBlendingMode = blendingMode => {
+    updateSettings({ ...settings, blendingMode });
+    Mathbox.select(`#surface-${settings.id}`).set("blending", blendingMode);
+  };
+  return {
+    settings,
+    update,
+    setColor,
+    setVisibility,
+    setOpacity,
+    setBlendingMode
+  };
 }
 
 export const FunctionSettingsContainer = createContainer(useFunctionSettings);
 
-function SettingsPanel({ functionIds, t, onRemove }) {
-  const { settings, update, setColor, setVisibility, setOpacity } = useContext(
-    FunctionSettingsContainer.Context
-  );
+function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
+  const {
+    settings,
+    update,
+    setColor,
+    setVisibility,
+    setOpacity,
+    setBlendingMode
+  } = useContext(FunctionSettingsContainer.Context);
   // Handle componentDidMount and componentDidUnmount (cleanup)
   useEffect(
     () => {
@@ -88,12 +115,12 @@ function SettingsPanel({ functionIds, t, onRemove }) {
           realtime: true
         }).surface({
           id: `surface-${settings.id}`,
-          lineX: true,
-          lineY: true,
-          shaded: true,
+          lineX: settings.lineX,
+          lineY: settings.lineY,
           color: settings.color,
           width: 2,
-          shaded: true
+          shaded: true,
+          blending: settings.blendingMode
         });
 
         return function cleanup() {
@@ -118,13 +145,13 @@ function SettingsPanel({ functionIds, t, onRemove }) {
   return (
     <ListGroupItem>
       <ListGroupItemHeading>
-        <h3 className="mb-3 float-left">
+        <span className="mb-3 font-weight-bold float-left">
           {settings.label ? (
             settings.label
           ) : (
             <InlineMath>{toTex(settings.expression)}</InlineMath>
           )}
-        </h3>
+        </span>
         <div className="float-right">
           <button
             type="button"
@@ -198,9 +225,39 @@ function SettingsPanel({ functionIds, t, onRemove }) {
           ) : null}
         </div>
         <hr />
+        <Dropdown
+          label={`${t("blending-mode")}:`}
+          options={["no", "normal", "add", "subtract", "multiply"]}
+          onChange={e => setBlendingMode(e.target.value)}
+        />
+        <hr />
+        <div>
+          <p>{t("derivate")}:</p>
+          <button
+            className="btn btn-lg btn-outline-primary mr-3"
+            onClick={() => {
+              const fn = fnCache.get(settings.expression);
+              const dt = derivate(fn.parsedFn, "x");
+              addFunction(dt.toString());
+            }}
+          >
+            <InlineMath>{String.raw`\frac{\text{df}}{\text{dx}}`}</InlineMath>
+          </button>
+          <button
+            className="btn btn-lg btn-outline-primary"
+            onClick={() => {
+              const fn = fnCache.get(settings.expression);
+              const dt = derivate(fn.parsedFn, "y");
+              addFunction(dt.toString());
+            }}
+          >
+            <InlineMath>{String.raw`\frac{\text{df}}{\text{dy}}`}</InlineMath>
+          </button>
+        </div>
+        <hr />
         <Slider
           text="X min"
-          min="-50"
+          min="-100"
           max="0"
           step="0.1"
           value={settings.rangeXMin}
@@ -221,7 +278,7 @@ function SettingsPanel({ functionIds, t, onRemove }) {
         <Slider
           text="X max"
           min="0"
-          max="50"
+          max="100"
           step="0.1"
           value={settings.rangeXMax}
           onChange={val => {
@@ -240,7 +297,7 @@ function SettingsPanel({ functionIds, t, onRemove }) {
         />
         <Slider
           text="Y min"
-          min="-50"
+          min="-100"
           max="0"
           step="0.1"
           value={settings.rangeYMin}
@@ -261,7 +318,7 @@ function SettingsPanel({ functionIds, t, onRemove }) {
         <Slider
           text="Y max"
           min="0"
-          max="50"
+          max="100"
           step="0.1"
           value={settings.rangeYMax}
           onChange={val => {

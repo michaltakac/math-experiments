@@ -1,7 +1,14 @@
 import React from "react";
 import Head from "next/head";
 import uuidv4 from "uuid/v4";
-import { ListGroup } from "reactstrap";
+import {
+  ListGroup,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter
+} from "reactstrap";
+import randomColor from "randomcolor";
 import { Checkbox } from "../components/Checkbox";
 import { Slider } from "../components/Slider";
 import SettingsPanel, {
@@ -10,6 +17,7 @@ import SettingsPanel, {
 import { Mathbox, initScene, initMathBox } from "../common/mathbox";
 
 import { i18n, withNamespaces } from "../i18n";
+import { TextInput } from "../components/TextInput";
 
 class Page extends React.Component {
   state = {
@@ -25,7 +33,8 @@ class Page extends React.Component {
     showXScale: true,
     showYScale: true,
     showZScale: true,
-    functions: new Set()
+    functions: new Map(),
+    expression: ""
   };
 
   static async getInitialProps() {
@@ -68,14 +77,23 @@ class Page extends React.Component {
     });
   }
 
-  addFunction = () => {
+  toggleModal = () => {
+    this.setState(prevState => ({ modalIsOpen: !prevState.modalIsOpen }));
+  };
+
+  addFunction = (expression = "x^2 + y^2") => {
+    if (typeof expression !== "string") {
+      expression = "x^2 + y^2";
+    }
+
     const id = uuidv4();
 
     this.setState(prevState => {
       const functions = prevState.functions;
-      functions.add(id);
+      functions.set(id, expression);
       return {
-        functions
+        functions,
+        expression: ""
       };
     });
   };
@@ -253,7 +271,7 @@ class Page extends React.Component {
               <Slider
                 text="X max"
                 min="0"
-                max="50"
+                max="100"
                 step="0.1"
                 value={this.state.xMax}
                 onChange={val => {
@@ -292,7 +310,7 @@ class Page extends React.Component {
               />
               <Slider
                 text="Y min"
-                min="-50"
+                min="-100"
                 max="0"
                 step="0.1"
                 value={this.state.yMin}
@@ -333,7 +351,7 @@ class Page extends React.Component {
               <Slider
                 text="Y max"
                 min="0"
-                max="50"
+                max="100"
                 step="0.1"
                 value={this.state.yMax}
                 onChange={val => {
@@ -372,7 +390,7 @@ class Page extends React.Component {
               />
               <Slider
                 text="Z min"
-                min="-50"
+                min="-100"
                 max="0"
                 step="0.1"
                 value={this.state.zMin}
@@ -413,7 +431,7 @@ class Page extends React.Component {
               <Slider
                 text="Z max"
                 min="0"
-                max="50"
+                max="100"
                 step="0.1"
                 value={this.state.zMax}
                 onChange={val => {
@@ -453,14 +471,19 @@ class Page extends React.Component {
               <hr />
               <ListGroup>
                 {Array.from(this.state.functions).map(
-                  id =>
+                  ([id, expression]) =>
                     id && (
                       <FunctionSettingsContainer.Provider
-                        initialSettings={{ id }}
+                        initialSettings={{
+                          id,
+                          expression,
+                          color: randomColor()
+                        }}
                         key={`key-${id}`}
                       >
                         <SettingsPanel
                           functionIds={this.state.functions}
+                          addFunction={this.addFunction}
                           onRemove={() => this.removeFunction(id)}
                         />
                       </FunctionSettingsContainer.Provider>
@@ -470,14 +493,57 @@ class Page extends React.Component {
               <br />
               <button
                 className="btn btn-lg btn-outline-primary"
-                onClick={this.addFunction}
+                onClick={() => this.addFunction()}
               >
                 <span className="glyphicon glyphicon-plus-sign" />{" "}
                 {t("add-function")}
               </button>
+              <button
+                className="btn btn-lg btn-outline-primary"
+                onClick={this.toggleModal}
+              >
+                <span className="glyphicon glyphicon-plus-sign" />{" "}
+                {t("add-custom-entity")}
+              </button>
             </div>
           </div>
         </div>
+        <Modal isOpen={this.state.modalIsOpen} toggle={this.toggleModal}>
+          <ModalBody>
+            <TextInput
+              text={`${t("expression")}:`}
+              placeholder={t("expression-placeholder")}
+              onChange={e =>
+                this.setState({
+                  expression: e.target.value
+                })
+              }
+            />
+            <button
+              className="btn btn-lg btn-outline-primary"
+              onClick={() => {
+                this.state.expression &&
+                  this.addFunction(this.state.expression);
+                this.toggleModal();
+              }}
+              disabled={!this.state.expression}
+            >
+              <span className="glyphicon glyphicon-plus-sign" />{" "}
+              {t("add-function")}
+            </button>
+          </ModalBody>
+          <ModalFooter>
+            <button
+              type="button"
+              className="btn btn-outline-secondary"
+              onClick={this.toggleModal}
+              data-dismiss="modal"
+            >
+              {t("close")}
+            </button>
+          </ModalFooter>
+        </Modal>
+
         <style jsx>
           {`
             .settings-panel {

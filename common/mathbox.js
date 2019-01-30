@@ -125,30 +125,36 @@ export function initScene(colors, opts) {
     .label({ color: 0xffffff, colors: "#colors" });
 }
 
-const fnCache = new Map();
+export const fnCache = new Map();
 
 export function calculateFn(expr) {
-  let parsedFn = undefined;
+  let node = undefined;
   if (fnCache.has(expr)) {
-    parsedFn = fnCache.get(expr);
+    node = fnCache.get(expr).node;
   } else {
-    parsedFn = parseFn(expr);
-    fnCache.set(expr, parsedFn);
+    const parsedFn = parseFn(expr);
+    node = parsedFn.compile();
+    fnCache.set(expr, { parsedFn, node });
   }
 
   return function(emit, x, y, i, j) {
-    const computedVal = computeFn(parsedFn, { x, y, i, j });
+    const computedVal = computeFn(node, { x, y, i, j });
     emit(x, computedVal, y);
   };
 }
 
 export function parseFn(expr) {
   const parsedFn = math.parse(expr || "x^2 - y^2");
-  return parsedFn.compile();
+  return parsedFn;
 }
 
 export function computeFn(fn, vars) {
   return fn.eval(vars);
+}
+
+// vars: 'x' | 'y'
+export function derivate(fn, vars) {
+  return math.derivative(fn, vars);
 }
 
 export function toTex(expr) {

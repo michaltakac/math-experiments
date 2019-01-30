@@ -4,7 +4,10 @@
   "language": "Language",
   "multiple-expression-title": "Math Project - Experiments with React, Mathbox and Next.js",
   "function": "Function",
+  "expression": "Expression",
+  "expression-placeholder": "e.g. x^2 + y^2",
   "add-function": "Add function",
+  "add-custom-entity": "Add custom entity",
   "change-locale": "Change language",
   "show-panel": "Show",
   "hide-panel": "Hide",
@@ -19,5 +22,8 @@
   "show-x-scale-numbers": "Show numbers on X axis",
   "show-y-scale-numbers": "Show numbers on Y axis",
   "show-z-scale-numbers": "Show numbers on Z axis",
-  "pick-color": "Pick color"
+  "pick-color": "Pick color",
+  "close": "Close",
+  "derivate": "Derivate",
+  "blending-mode": "Blending mode"
 }

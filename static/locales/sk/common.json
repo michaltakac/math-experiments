@@ -4,7 +4,10 @@
   "language": "Jazyk",
   "multiple-expression-title": "Matematický Projekt - Experimenty s Reactom, Mathboxom and Next.js",
   "function": "Funkcia",
+  "expression": "Predpis funkcie",
+  "expression-placeholder": "napr. x^2 + y^2",
   "add-function": "Pridať funkciu",
+  "add-custom-entity": "Pridať inú entitu",
   "change-locale": "Zmeniť jazyk",
   "show-panel": "Rozbaliť",
   "hide-panel": "Skryť",
@@ -19,5 +22,8 @@
   "show-x-scale-numbers": "Zobraziť čísla na osi X",
   "show-y-scale-numbers": "Zobraziť čísla na osi Y",
   "show-z-scale-numbers": "Zobraziť čísla na osi Z",
-  "pick-color": "Vyber farbu"
+  "pick-color": "Vyber farbu",
+  "close": "Zavrieť",
+  "derivate": "Derivovať",
+  "blending-mode": "Režim miešania"
 }
