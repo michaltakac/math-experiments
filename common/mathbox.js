@@ -108,8 +108,7 @@ export function initScene(colors, opts) {
     rangeY: [options.range[2][0], options.range[2][1]],
     width: 1,
     color: 0xb0b0b0,
-    depth: 1,
-    endX: false
+    depth: 1
   });
 
   Scene.array({

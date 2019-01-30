@@ -18,5 +18,6 @@
   "draw-function": "Vykresli funkciu",
   "show-x-scale-numbers": "Zobraziť čísla na osi X",
   "show-y-scale-numbers": "Zobraziť čísla na osi Y",
-  "show-z-scale-numbers": "Zobraziť čísla na osi Z"
+  "show-z-scale-numbers": "Zobraziť čísla na osi Z",
+  "pick-color": "Vyber farbu"
 }

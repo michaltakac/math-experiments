@@ -190,37 +190,34 @@ class Page extends React.Component {
               />
               <Slider
                 text={t("fov")}
-                min="50"
-                max="120"
+                min="30"
+                max="150"
                 value={this.state.fov}
-                onChange={e => {
-                  this.setState({ fov: parseFloat(e.target.value) });
-                  Mathbox._context.camera.fov = parseFloat(e.target.value);
+                onChange={val => {
+                  this.setState({ fov: parseFloat(val) });
+                  Mathbox._context.camera.fov = parseFloat(val);
                 }}
               />
               <Slider
                 text={t("grid-width")}
                 min="0.1"
-                max="4"
+                max="10"
                 step="0.1"
                 value={this.state.gridWidth}
-                onChange={e => {
-                  this.setState({ gridWidth: parseFloat(e.target.value) });
-                  Mathbox.select("grid").set(
-                    "width",
-                    parseFloat(e.target.value)
-                  );
+                onChange={val => {
+                  this.setState({ gridWidth: parseFloat(val) });
+                  Mathbox.select("grid").set("width", parseFloat(val));
                 }}
               />
               <hr />
               <Slider
                 text="X min"
-                min="-30"
-                max="30"
+                min="-50"
+                max="0"
                 step="0.1"
                 value={this.state.xMin}
-                onChange={e => {
-                  this.setState({ xMin: parseFloat(e.target.value) });
+                onChange={val => {
+                  this.setState({ xMin: parseFloat(val) });
                   Mathbox.select("cartesian").set("range", [
                     [this.state.xMin, this.state.xMax],
                     [this.state.zMin, this.state.zMax],
@@ -255,12 +252,12 @@ class Page extends React.Component {
               />
               <Slider
                 text="X max"
-                min="-30"
-                max="30"
+                min="0"
+                max="50"
                 step="0.1"
                 value={this.state.xMax}
-                onChange={e => {
-                  this.setState({ xMax: parseFloat(e.target.value) });
+                onChange={val => {
+                  this.setState({ xMax: parseFloat(val) });
                   Mathbox.select("cartesian").set("range", [
                     [this.state.xMin, this.state.xMax],
                     [this.state.zMin, this.state.zMax],
@@ -295,12 +292,12 @@ class Page extends React.Component {
               />
               <Slider
                 text="Y min"
-                min="-30"
-                max="30"
+                min="-50"
+                max="0"
                 step="0.1"
                 value={this.state.yMin}
-                onChange={e => {
-                  this.setState({ yMin: parseFloat(e.target.value) });
+                onChange={val => {
+                  this.setState({ yMin: parseFloat(val) });
                   Mathbox.select("cartesian").set("range", [
                     [this.state.xMin, this.state.xMax],
                     [this.state.zMin, this.state.zMax],
@@ -335,12 +332,12 @@ class Page extends React.Component {
               />
               <Slider
                 text="Y max"
-                min="-30"
-                max="30"
+                min="0"
+                max="50"
                 step="0.1"
                 value={this.state.yMax}
-                onChange={e => {
-                  this.setState({ yMax: parseFloat(e.target.value) });
+                onChange={val => {
+                  this.setState({ yMax: parseFloat(val) });
                   Mathbox.select("cartesian").set("range", [
                     [this.state.xMin, this.state.xMax],
                     [this.state.zMin, this.state.zMax],
@@ -375,12 +372,12 @@ class Page extends React.Component {
               />
               <Slider
                 text="Z min"
-                min="-30"
-                max="30"
+                min="-50"
+                max="0"
                 step="0.1"
                 value={this.state.zMin}
-                onChange={e => {
-                  this.setState({ zMin: parseFloat(e.target.value) });
+                onChange={val => {
+                  this.setState({ zMin: parseFloat(val) });
                   Mathbox.select("cartesian").set("range", [
                     [this.state.xMin, this.state.xMax],
                     [this.state.zMin, this.state.zMax],
@@ -415,12 +412,12 @@ class Page extends React.Component {
               />
               <Slider
                 text="Z max"
-                min="-30"
-                max="30"
+                min="0"
+                max="50"
                 step="0.1"
                 value={this.state.zMax}
-                onChange={e => {
-                  this.setState({ zMax: parseFloat(e.target.value) });
+                onChange={val => {
+                  this.setState({ zMax: parseFloat(val) });
                   Mathbox.select("cartesian").set("range", [
                     [this.state.xMin, this.state.xMax],
                     [this.state.zMin, this.state.zMax],

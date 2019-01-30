@@ -1,10 +1,46 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 export function Slider({ min, max, step, value, text, onChange }) {
+  const [state, update] = useState({ editing: false, value });
+
+  function onEsc(event) {
+    // Disable editing on pressing ESC
+    if (state.editing && event.keyCode === 27) {
+      update({ editing: false });
+    }
+  }
+
+  useEffect(() => {
+    document.addEventListener("keydown", onEsc);
+
+    return function cleanup() {
+      document.removeEventListener("keydown", onEsc);
+    };
+  });
+
   return (
-    <div>
+    <form
+      onSubmit={e => {
+        e.preventDefault();
+
+        update({ editing: false });
+        onChange(state.value);
+      }}
+    >
       <div className="form-group">
-        {text}: <span>{value}</span>
+        {text}:{" "}
+        {state.editing ? (
+          <input
+            type="number"
+            defaultValue={value}
+            onChange={e => {
+              update({ editing: true, value: e.target.value });
+              onChange(e.target.value);
+            }}
+          />
+        ) : (
+          <span onClick={() => update({ editing: true })}>{value}</span>
+        )}
         <br />
         <input
           type="range"
@@ -12,7 +48,10 @@ export function Slider({ min, max, step, value, text, onChange }) {
           max={max}
           step={step}
           value={value}
-          onChange={onChange}
+          onChange={e => {
+            update({ editing: false, value: e.target.value });
+            onChange(e.target.value);
+          }}
           className="slider form-control"
         />
       </div>
@@ -52,6 +91,6 @@ export function Slider({ min, max, step, value, text, onChange }) {
           cursor: pointer;
         }
       `}</style>
-    </div>
+    </form>
   );
 }

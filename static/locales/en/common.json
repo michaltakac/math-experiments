@@ -18,5 +18,6 @@
   "draw-function": "Draw function",
   "show-x-scale-numbers": "Show numbers on X axis",
   "show-y-scale-numbers": "Show numbers on Y axis",
-  "show-z-scale-numbers": "Show numbers on Z axis"
+  "show-z-scale-numbers": "Show numbers on Z axis",
+  "pick-color": "Pick color"
 }

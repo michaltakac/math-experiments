@@ -182,10 +182,10 @@ function SettingsPanel({ functionIds, t, onRemove }) {
           max="1"
           step="0.1"
           value={settings.opacity}
-          onChange={e => setOpacity(parseFloat(e.target.value))}
+          onChange={val => setOpacity(parseFloat(val))}
         />
         <div>
-          <button onClick={handleClick}>Pick Color</button>
+          <button onClick={handleClick}>{t("pick-color")}</button>
           {settings.displayColorPicker ? (
             <div style={popover}>
               <div style={cover} onClick={handleClose} />
@@ -201,11 +201,11 @@ function SettingsPanel({ functionIds, t, onRemove }) {
         <Slider
           text="X min"
           min="-50"
-          max="50"
+          max="0"
           step="0.1"
           value={settings.rangeXMin}
-          onChange={e => {
-            update({ rangeXMin: parseFloat(e.target.value) });
+          onChange={val => {
+            update({ rangeXMin: parseFloat(val) });
 
             Mathbox.select(`#${settings.id}`).set("rangeX", [
               settings.rangeXMin,
@@ -220,12 +220,12 @@ function SettingsPanel({ functionIds, t, onRemove }) {
         />
         <Slider
           text="X max"
-          min="-50"
+          min="0"
           max="50"
           step="0.1"
           value={settings.rangeXMax}
-          onChange={e => {
-            update({ rangeXMax: parseFloat(e.target.value) });
+          onChange={val => {
+            update({ rangeXMax: parseFloat(val) });
 
             Mathbox.select(`#${settings.id}`).set("rangeX", [
               settings.rangeXMin,
@@ -241,11 +241,11 @@ function SettingsPanel({ functionIds, t, onRemove }) {
         <Slider
           text="Y min"
           min="-50"
-          max="50"
+          max="0"
           step="0.1"
           value={settings.rangeYMin}
-          onChange={e => {
-            update({ rangeYMin: parseFloat(e.target.value) });
+          onChange={val => {
+            update({ rangeYMin: parseFloat(val) });
 
             Mathbox.select(`#${settings.id}`).set("rangeY", [
               settings.rangeYMin,
@@ -260,12 +260,12 @@ function SettingsPanel({ functionIds, t, onRemove }) {
         />
         <Slider
           text="Y max"
-          min="-50"
+          min="0"
           max="50"
           step="0.1"
           value={settings.rangeYMax}
-          onChange={e => {
-            update({ rangeYMax: parseFloat(e.target.value) });
+          onChange={val => {
+            update({ rangeYMax: parseFloat(val) });
 
             Mathbox.select(`#${settings.id}`).set("rangeY", [
               settings.rangeYMin,
