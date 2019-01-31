@@ -145,7 +145,14 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
   return (
     <ListGroupItem>
       <ListGroupItemHeading>
-        <span className="mb-3 font-weight-bold float-left">
+        <span
+          className="mb-3 font-weight-bold float-left"
+          style={{ color: settings.visible ? "black" : "#c7c7c7" }}
+        >
+          <span
+            className="glyphicon glyphicon-tint mr-2"
+            style={{ color: settings.visible ? settings.color : "#c7c7c7" }}
+          />
           {settings.label ? (
             settings.label
           ) : (
@@ -154,17 +161,38 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
         </span>
         <div className="float-right">
           <button
-            type="button"
-            className="btn btn-primary btn-lg"
-            onClick={() => update({ panelOpen: !settings.panelOpen })}
+            className="btn btn-primary"
+            onClick={() =>
+              update({
+                panelOpen: !settings.panelOpen
+              })
+            }
           >
-            {settings.panelOpen ? t("hide-panel") : t("show-panel")}
+            <span
+              className={`glyphicon ${
+                settings.panelOpen
+                  ? "glyphicon-chevron-up"
+                  : "glyphicon-chevron-down"
+              }`}
+            />
           </button>
           <button
-            type="button"
-            className="btn btn-danger btn-lg"
+            className="btn btn-warning"
+            onClick={() => setVisibility(!settings.visible)}
+          >
+            <span
+              className={`glyphicon ${
+                settings.visible
+                  ? "glyphicon glyphicon-eye-close"
+                  : "glyphicon glyphicon-eye-open"
+              }`}
+            />
+          </button>
+          <button
+            className="btn btn-danger"
             onClick={() => {
-              onRemove(settings.id);
+              window.confirm("Are you sure you wish to delete this item?") &&
+                onRemove(settings.id);
             }}
           >
             <span className="glyphicon glyphicon-remove" />
@@ -212,7 +240,9 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
           onChange={val => setOpacity(parseFloat(val))}
         />
         <div>
-          <button onClick={handleClick}>{t("pick-color")}</button>
+          <button className="btn btn-primary" onClick={handleClick}>
+            {t("pick-color")}
+          </button>
           {settings.displayColorPicker ? (
             <div style={popover}>
               <div style={cover} onClick={handleClose} />
@@ -227,7 +257,7 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
         <hr />
         <Dropdown
           label={`${t("blending-mode")}:`}
-          options={["no", "normal", "add", "subtract", "multiply"]}
+          options={["normal", "add", "subtract", "multiply", "no"]}
           onChange={e => setBlendingMode(e.target.value)}
         />
         <hr />
