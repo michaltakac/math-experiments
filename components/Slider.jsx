@@ -47,7 +47,7 @@ export function Slider({ min, max, step, value, text, onChange }) {
           min={min}
           max={max}
           step={step}
-          value={value}
+          defaultValue={value}
           onChange={e => {
             update({ editing: false, value: e.target.value });
             onChange(e.target.value);

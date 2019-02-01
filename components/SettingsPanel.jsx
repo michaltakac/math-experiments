@@ -35,10 +35,12 @@ const cover = {
 };
 
 export const INITIAL_STATE = {
-  rangeXMin: -4,
-  rangeXMax: 4,
-  rangeYMin: -4,
-  rangeYMax: 4,
+  rangeXMin: -10,
+  rangeXMax: 10,
+  rangeYMin: -10,
+  rangeYMax: 10,
+  rangeZMin: -20,
+  rangeZMax: 20,
   lineX: false,
   lineY: false,
   blendingMode: "normal",
@@ -96,43 +98,46 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
     setBlendingMode
   } = useContext(FunctionSettingsContainer.Context);
   // Handle componentDidMount and componentDidUnmount (cleanup)
-  useEffect(
-    () => {
-      if (functionIds.has(settings.id) && !cache.has(settings.id)) {
-        // Add current function ID to cache
-        cache.add(settings.id);
-        // Render function
-        Scene.area({
-          id: settings.id,
-          width: 50,
-          height: 50,
-          axes: [1, 3],
-          live: true,
-          rangeX: [-4, 4],
-          rangeY: [-4, 4],
-          expr: calculateFn(settings.expression),
-          channels: 3,
-          realtime: true
-        }).surface({
-          id: `surface-${settings.id}`,
-          lineX: settings.lineX,
-          lineY: settings.lineY,
-          color: settings.color,
-          width: 2,
-          shaded: true,
-          blending: settings.blendingMode
-        });
+  useEffect(() => {
+    if (functionIds.has(settings.id) && !cache.has(settings.id)) {
+      // Add current function ID to cache
+      cache.add(settings.id);
+      // Render function
+      Scene.area({
+        id: settings.id,
+        width: 100,
+        height: 100,
+        axes: [1, 3],
+        live: true,
+        rangeX: [-4, 4],
+        rangeY: [-4, 4],
+        expr: calculateFn(settings.expression, [
+          settings.rangeZMin,
+          settings.rangeZMax
+        ]),
+        channels: 3,
+        realtime: true
+      }).surface({
+        id: `surface-${settings.id}`,
+        lineX: settings.lineX,
+        lineY: settings.lineY,
+        color: settings.color,
+        width: 2,
+        shaded: true,
+        zBias: cache.values.length,
+        zOrder: cache.values.length,
+        blending: settings.blendingMode,
+        closed: true
+      });
 
-        return function cleanup() {
-          if (cache.has(settings.id) && !functionIds.has(settings.id)) {
-            cache.delete(settings.id);
-            Mathbox.remove(`#${settings.id}`);
-          }
-        };
-      }
-    },
-    [functionIds]
-  );
+      return function cleanup() {
+        if (cache.has(settings.id) && !functionIds.has(settings.id)) {
+          cache.delete(settings.id);
+          Mathbox.remove(`#${settings.id}`);
+        }
+      };
+    }
+  }, [functionIds]);
 
   function handleClick() {
     update({ displayColorPicker: !settings.displayColorPicker });
@@ -212,7 +217,10 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
 
             Mathbox.select(`#${settings.id}`).set(
               "expr",
-              calculateFn(settings.expression)
+              calculateFn(settings.expression, [
+                settings.rangeZMin,
+                settings.rangeZMax
+              ])
             );
           }}
         />
@@ -301,7 +309,10 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
 
             Mathbox.select(`#${settings.id}`).set(
               "expr",
-              calculateFn(settings.expression)
+              calculateFn(settings.expression, [
+                settings.rangeZMin,
+                settings.rangeZMax
+              ])
             );
           }}
         />
@@ -321,7 +332,10 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
 
             Mathbox.select(`#${settings.id}`).set(
               "expr",
-              calculateFn(settings.expression)
+              calculateFn(settings.expression, [
+                settings.rangeZMin,
+                settings.rangeZMax
+              ])
             );
           }}
         />
@@ -341,7 +355,10 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
 
             Mathbox.select(`#${settings.id}`).set(
               "expr",
-              calculateFn(settings.expression)
+              calculateFn(settings.expression, [
+                settings.rangeZMin,
+                settings.rangeZMax
+              ])
             );
           }}
         />
@@ -361,7 +378,46 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
 
             Mathbox.select(`#${settings.id}`).set(
               "expr",
-              calculateFn(settings.expression)
+              calculateFn(settings.expression, [
+                settings.rangeZMin,
+                settings.rangeZMax
+              ])
+            );
+          }}
+        />
+        <Slider
+          text="Z min"
+          min="-100"
+          max={Math.min(settings.rangeZMax, 100)}
+          step="0.1"
+          value={settings.rangeZMin}
+          onChange={val => {
+            update({ rangeZMin: parseFloat(val) });
+
+            Mathbox.select(`#${settings.id}`).set(
+              "expr",
+              calculateFn(settings.expression, [
+                settings.rangeZMin,
+                settings.rangeZMax
+              ])
+            );
+          }}
+        />
+        <Slider
+          text="Z max"
+          min={Math.max(settings.rangeZMin, -100)}
+          max="100"
+          step="0.1"
+          value={settings.rangeZMax}
+          onChange={val => {
+            update({ rangeZMax: parseFloat(val) });
+
+            Mathbox.select(`#${settings.id}`).set(
+              "expr",
+              calculateFn(settings.expression, [
+                settings.rangeZMin,
+                settings.rangeZMax
+              ])
             );
           }}
         />
