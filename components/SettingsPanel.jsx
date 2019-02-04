@@ -52,7 +52,8 @@ export const INITIAL_STATE = {
   visible: true,
   opacity: 1,
   displayColorPicker: false,
-  panelOpen: false
+  panelOpen: false,
+  infillType: "surface"
 };
 
 function useFunctionSettings({ initialSettings }) {
@@ -77,13 +78,37 @@ function useFunctionSettings({ initialSettings }) {
     updateSettings({ ...settings, blendingMode });
     Mathbox.select(`#surface-${settings.id}`).set("blending", blendingMode);
   };
+  const setInfill = infillType => {
+    updateSettings({ ...settings, infillType });
+
+    switch (infillType) {
+      case "points":
+        Mathbox.select(`#surface-${settings.id}`).set("visible", false);
+        Mathbox.select(`#points-${settings.id}`).set("visible", true);
+        Mathbox.select(`#lines-${settings.id}`).set("visible", false);
+        break;
+
+      case "lines":
+        Mathbox.select(`#surface-${settings.id}`).set("visible", false);
+        Mathbox.select(`#points-${settings.id}`).set("visible", false);
+        Mathbox.select(`#lines-${settings.id}`).set("visible", true);
+        break;
+
+      default:
+        Mathbox.select(`#surface-${settings.id}`).set("visible", true);
+        Mathbox.select(`#points-${settings.id}`).set("visible", false);
+        Mathbox.select(`#lines-${settings.id}`).set("visible", false);
+        break;
+    }
+  };
   return {
     settings,
     update,
     setColor,
     setVisibility,
     setOpacity,
-    setBlendingMode
+    setBlendingMode,
+    setInfill
   };
 }
 
@@ -96,7 +121,8 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
     setColor,
     setVisibility,
     setOpacity,
-    setBlendingMode
+    setBlendingMode,
+    setInfill
   } = useContext(FunctionSettingsContainer.Context);
   // Handle componentDidMount and componentDidUnmount (cleanup)
   useEffect(() => {
@@ -114,12 +140,14 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
         rangeY: [-4, 4],
         expr: calculateFn(
           settings.expression,
-          [settings.rangeZMin, settings.rangeZMax],
+          { min: settings.rangeZMin, max: settings.rangeZMax },
           settings.limitZ
         ),
         channels: 3,
         realtime: true
-      }).surface({
+      });
+
+      Scene.surface({
         id: `surface-${settings.id}`,
         lineX: settings.lineX,
         lineY: settings.lineY,
@@ -129,7 +157,24 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
         zBias: cache.values.length,
         zOrder: cache.values.length,
         blending: settings.blendingMode,
-        closed: true
+        closed: true,
+        visible: settings.infillType === "surface"
+      });
+
+      Scene.point({
+        id: `points-${settings.id}`,
+        color: settings.color,
+        blending: settings.blendingMode,
+        visible: settings.infillType === "points"
+      });
+
+      Scene.line({
+        id: `lines-${settings.id}`,
+        color: settings.color,
+        zBias: cache.values.length,
+        zOrder: cache.values.length,
+        blending: settings.blendingMode,
+        visible: settings.infillType === "lines"
       });
 
       return function cleanup() {
@@ -223,7 +268,7 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
               "expr",
               calculateFn(
                 settings.expression,
-                [settings.rangeZMin, settings.rangeZMax],
+                { min: settings.rangeZMin, max: settings.rangeZMax },
                 settings.limitZ
               )
             );
@@ -269,6 +314,11 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
         </div>
         <hr />
         <Dropdown
+          label={`${t("infill")}:`}
+          options={["surface", "points", "lines"]}
+          onChange={e => setInfill(e.target.value)}
+        />
+        <Dropdown
           label={`${t("blending-mode")}:`}
           options={["normal", "add", "subtract", "multiply", "no"]}
           onChange={e => setBlendingMode(e.target.value)}
@@ -284,7 +334,7 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
               addFunction(dt.toString());
             }}
           >
-            <InlineMath>{String.raw`\frac{\text{df}}{\text{dx}}`}</InlineMath>
+            <InlineMath>{String.raw`\frac{\partial f}{\partial x}`}</InlineMath>
           </button>
           <button
             className="btn btn-lg btn-outline-primary"
@@ -294,7 +344,7 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
               addFunction(dt.toString());
             }}
           >
-            <InlineMath>{String.raw`\frac{\text{df}}{\text{dy}}`}</InlineMath>
+            <InlineMath>{String.raw`\frac{\partial f}{\partial y}`}</InlineMath>
           </button>
         </div>
         <hr />
@@ -316,7 +366,7 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
               "expr",
               calculateFn(
                 settings.expression,
-                [settings.rangeZMin, settings.rangeZMax],
+                { min: settings.rangeZMin, max: settings.rangeZMax },
                 settings.limitZ
               )
             );
@@ -340,7 +390,7 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
               "expr",
               calculateFn(
                 settings.expression,
-                [settings.rangeZMin, settings.rangeZMax],
+                { min: settings.rangeZMin, max: settings.rangeZMax },
                 settings.limitZ
               )
             );
@@ -364,7 +414,7 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
               "expr",
               calculateFn(
                 settings.expression,
-                [settings.rangeZMin, settings.rangeZMax],
+                { min: settings.rangeZMin, max: settings.rangeZMax },
                 settings.limitZ
               )
             );
@@ -388,7 +438,7 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
               "expr",
               calculateFn(
                 settings.expression,
-                [settings.rangeZMin, settings.rangeZMax],
+                { min: settings.rangeZMin, max: settings.rangeZMax },
                 settings.limitZ
               )
             );
@@ -403,7 +453,7 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
               "expr",
               calculateFn(
                 settings.expression,
-                [settings.rangeZMin, settings.rangeZMax],
+                { min: settings.rangeZMin, max: settings.rangeZMax },
                 settings.limitZ
               )
             );
@@ -423,7 +473,7 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
               "expr",
               calculateFn(
                 settings.expression,
-                [settings.rangeZMin, settings.rangeZMax],
+                { min: settings.rangeZMin, max: settings.rangeZMax },
                 settings.limitZ
               )
             );
@@ -442,7 +492,7 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
               "expr",
               calculateFn(
                 settings.expression,
-                [settings.rangeZMin, settings.rangeZMax],
+                { min: settings.rangeZMin, max: settings.rangeZMax },
                 settings.limitZ
               )
             );

@@ -26,5 +26,6 @@
   "close": "Zavrieť",
   "derivate": "Derivovať",
   "blending-mode": "Režim miešania",
-  "limit-z": "Orezať os Z?"
+  "limit-z": "Orezať os Z?",
+  "infill": "Výplň"
 }

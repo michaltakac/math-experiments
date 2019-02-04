@@ -26,5 +26,6 @@
   "close": "Close",
   "derivate": "Derivate",
   "blending-mode": "Blending mode",
-  "limit-z": "Limit Z-axis?"
+  "limit-z": "Limit Z-axis?",
+  "infill": "Infill"
 }

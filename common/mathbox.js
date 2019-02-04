@@ -127,6 +127,16 @@ export function initScene(colors, opts) {
 
 export const fnCache = new Map();
 
+/**
+ * Compiles and calculates given functin expression.
+ *
+ * @param {string} expr         - function expression
+ * @param {Object} rangeZ       - object containing min and max limits on Z exis
+ * @param {number} rangeZ.min   - min limit on Z axis
+ * @param {number} rangeZ.max   - max limit on Z axis
+ * @param {boolean} limitZ      - should take Z axis limit into account?
+ * @returns {function} emitToScene
+ */
 export function calculateFn(expr, rangeZ, limitZ) {
   let node = undefined;
   if (fnCache.has(expr)) {
@@ -137,13 +147,13 @@ export function calculateFn(expr, rangeZ, limitZ) {
     fnCache.set(expr, { parsedFn, node });
   }
 
-  return function(emit, x, y, i, j) {
+  return function emitToScene(emit, x, y, i, j) {
     const computedVal = computeFn(node, { x, y, i, j });
 
-    if (limitZ && computedVal < rangeZ[0]) {
-      emit(x, rangeZ[0], y);
-    } else if (limitZ && computedVal > rangeZ[1]) {
-      emit(x, rangeZ[1], y);
+    if (computedVal < rangeZ.min) {
+      limitZ && emit(x, rangeZ.min, y);
+    } else if (computedVal > rangeZ.max) {
+      limitZ && emit(x, rangeZ.max, y);
     } else {
       emit(x, computedVal, y);
     }
