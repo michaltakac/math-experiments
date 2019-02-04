@@ -25,5 +25,6 @@
   "pick-color": "Pick color",
   "close": "Close",
   "derivate": "Derivate",
-  "blending-mode": "Blending mode"
+  "blending-mode": "Blending mode",
+  "limit-z": "Limit Z-axis?"
 }

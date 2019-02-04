@@ -127,7 +127,7 @@ export function initScene(colors, opts) {
 
 export const fnCache = new Map();
 
-export function calculateFn(expr, rangeZ) {
+export function calculateFn(expr, rangeZ, limitZ) {
   let node = undefined;
   if (fnCache.has(expr)) {
     node = fnCache.get(expr).node;
@@ -140,9 +140,9 @@ export function calculateFn(expr, rangeZ) {
   return function(emit, x, y, i, j) {
     const computedVal = computeFn(node, { x, y, i, j });
 
-    if (computedVal < rangeZ[0]) {
+    if (limitZ && computedVal < rangeZ[0]) {
       emit(x, rangeZ[0], y);
-    } else if (computedVal > rangeZ[1]) {
+    } else if (limitZ && computedVal > rangeZ[1]) {
       emit(x, rangeZ[1], y);
     } else {
       emit(x, computedVal, y);

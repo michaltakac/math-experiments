@@ -25,5 +25,6 @@
   "pick-color": "Vyber farbu",
   "close": "Zavrieť",
   "derivate": "Derivovať",
-  "blending-mode": "Režim miešania"
+  "blending-mode": "Režim miešania",
+  "limit-z": "Orezať os Z?"
 }

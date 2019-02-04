@@ -41,6 +41,7 @@ export const INITIAL_STATE = {
   rangeYMax: 10,
   rangeZMin: -20,
   rangeZMax: 20,
+  limitZ: true,
   lineX: false,
   lineY: false,
   blendingMode: "normal",
@@ -111,10 +112,11 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
         live: true,
         rangeX: [-4, 4],
         rangeY: [-4, 4],
-        expr: calculateFn(settings.expression, [
-          settings.rangeZMin,
-          settings.rangeZMax
-        ]),
+        expr: calculateFn(
+          settings.expression,
+          [settings.rangeZMin, settings.rangeZMax],
+          settings.limitZ
+        ),
         channels: 3,
         realtime: true
       }).surface({
@@ -219,10 +221,11 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
 
             Mathbox.select(`#${settings.id}`).set(
               "expr",
-              calculateFn(settings.expression, [
-                settings.rangeZMin,
-                settings.rangeZMax
-              ])
+              calculateFn(
+                settings.expression,
+                [settings.rangeZMin, settings.rangeZMax],
+                settings.limitZ
+              )
             );
           }}
         />
@@ -311,10 +314,11 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
 
             Mathbox.select(`#${settings.id}`).set(
               "expr",
-              calculateFn(settings.expression, [
-                settings.rangeZMin,
-                settings.rangeZMax
-              ])
+              calculateFn(
+                settings.expression,
+                [settings.rangeZMin, settings.rangeZMax],
+                settings.limitZ
+              )
             );
           }}
         />
@@ -334,10 +338,11 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
 
             Mathbox.select(`#${settings.id}`).set(
               "expr",
-              calculateFn(settings.expression, [
-                settings.rangeZMin,
-                settings.rangeZMax
-              ])
+              calculateFn(
+                settings.expression,
+                [settings.rangeZMin, settings.rangeZMax],
+                settings.limitZ
+              )
             );
           }}
         />
@@ -357,10 +362,11 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
 
             Mathbox.select(`#${settings.id}`).set(
               "expr",
-              calculateFn(settings.expression, [
-                settings.rangeZMin,
-                settings.rangeZMax
-              ])
+              calculateFn(
+                settings.expression,
+                [settings.rangeZMin, settings.rangeZMax],
+                settings.limitZ
+              )
             );
           }}
         />
@@ -380,12 +386,29 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
 
             Mathbox.select(`#${settings.id}`).set(
               "expr",
-              calculateFn(settings.expression, [
-                settings.rangeZMin,
-                settings.rangeZMax
-              ])
+              calculateFn(
+                settings.expression,
+                [settings.rangeZMin, settings.rangeZMax],
+                settings.limitZ
+              )
             );
           }}
+        />
+        <Checkbox
+          text={`${t("limit-z")}?`}
+          onChange={e => {
+            update({ limitZ: e.target.checked });
+
+            Mathbox.select(`#${settings.id}`).set(
+              "expr",
+              calculateFn(
+                settings.expression,
+                [settings.rangeZMin, settings.rangeZMax],
+                settings.limitZ
+              )
+            );
+          }}
+          checked={settings.limitZ}
         />
         <Slider
           text="Z min"
@@ -398,10 +421,11 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
 
             Mathbox.select(`#${settings.id}`).set(
               "expr",
-              calculateFn(settings.expression, [
-                settings.rangeZMin,
-                settings.rangeZMax
-              ])
+              calculateFn(
+                settings.expression,
+                [settings.rangeZMin, settings.rangeZMax],
+                settings.limitZ
+              )
             );
           }}
         />
@@ -416,10 +440,11 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
 
             Mathbox.select(`#${settings.id}`).set(
               "expr",
-              calculateFn(settings.expression, [
-                settings.rangeZMin,
-                settings.rangeZMax
-              ])
+              calculateFn(
+                settings.expression,
+                [settings.rangeZMin, settings.rangeZMax],
+                settings.limitZ
+              )
             );
           }}
         />
