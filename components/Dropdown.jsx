@@ -9,8 +9,8 @@ export function Dropdown({ label, options, onChange }) {
     <FormGroup>
       <Label for={id}>{label}</Label>
       <Input type="select" name={`select-${id}`} id={id} onChange={onChange}>
-        {options.map(option => (
-          <option>{option}</option>
+        {options.map((option, i) => (
+          <option key={i}>{option}</option>
         ))}
       </Input>
     </FormGroup>
