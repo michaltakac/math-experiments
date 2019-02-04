@@ -161,7 +161,9 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
           {settings.label ? (
             settings.label
           ) : (
-            <InlineMath>{toTex(settings.expression)}</InlineMath>
+            <InlineMath>
+              {settings.expression && toTex(settings.expression)}
+            </InlineMath>
           )}
         </span>
         <div className="float-right">

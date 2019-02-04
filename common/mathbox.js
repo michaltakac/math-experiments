@@ -151,7 +151,7 @@ export function calculateFn(expr, rangeZ) {
 }
 
 export function parseFn(expr) {
-  const parsedFn = math.parse(expr || "x^2 - y^2");
+  const parsedFn = math.parse(expr);
   return parsedFn;
 }
 
@@ -173,7 +173,7 @@ export function toTex(expr) {
     const node = math.parse(expr);
     return node.toTex();
   } catch (e) {
-    console.warn(e);
+    // console.warn(e);
     return expr;
   }
 }
