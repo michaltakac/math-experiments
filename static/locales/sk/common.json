@@ -27,5 +27,10 @@
   "derivate": "Derivovať",
   "blending-mode": "Režim miešania",
   "limit-z": "Orezať os Z?",
-  "infill": "Výplň"
+  "infill": "Výplň",
+  "save-scene": "Uložiť scénu",
+  "load-scene": "Načítať scénu",
+  "clear-scene": "Vymazať všetky scény",
+  "scene-name": "Názov scény",
+  "swizzle-axis": "Prehodiť osi"
 }

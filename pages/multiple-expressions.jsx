@@ -1,23 +1,24 @@
 import React from "react";
 import Head from "next/head";
 import uuidv4 from "uuid/v4";
+import { ListGroup, Modal, ModalBody, ModalFooter } from "reactstrap";
 import {
-  ListGroup,
-  Modal,
-  ModalHeader,
-  ModalBody,
-  ModalFooter
-} from "reactstrap";
-import randomColor from "randomcolor";
+  saveScene,
+  loadScene,
+  getStoredKeys,
+  removeScene,
+  initLocalStorageEngine
+} from "../helpers";
 import { Checkbox } from "../components/Checkbox";
 import { Slider } from "../components/Slider";
 import SettingsPanel, {
   FunctionSettingsContainer
-} from "../components/SettingsPanel";
-import { Mathbox, initScene, initMathBox } from "../common/mathbox";
-
+} from "../components/AreaSettingsPanel";
+import { Mathbox, initScene, initMathBox } from "../utils/mathbox";
+import { FUNCTIONS_SETTINGS_LIST } from "../helpers";
 import { i18n, withNamespaces } from "../i18n";
 import { TextInput } from "../components/TextInput";
+import { Dropdown } from "../components/Dropdown";
 
 class Page extends React.Component {
   state = {
@@ -33,8 +34,11 @@ class Page extends React.Component {
     showXScale: true,
     showYScale: true,
     showZScale: true,
+    expression: "",
     functions: new Map(),
-    expression: ""
+    sceneName: "",
+    localStorageReady: false,
+    savedScenes: null
   };
 
   static async getInitialProps() {
@@ -44,6 +48,14 @@ class Page extends React.Component {
   }
 
   componentDidMount() {
+    initLocalStorageEngine(localStorage).then(isReady => {
+      console.log(isReady);
+      this.setState({
+        localStorageReady: isReady,
+        savedScenes: getStoredKeys()
+      });
+    });
+
     // Bootstrap MathBox
     const el = document.querySelector("#visualization");
     initMathBox(el, {
@@ -75,6 +87,8 @@ class Page extends React.Component {
         [this.state.yMin, this.state.yMax]
       ]
     });
+
+    this.setState({ ready: true });
   }
 
   toggleModal = () => {
@@ -87,23 +101,41 @@ class Page extends React.Component {
     }
 
     const id = uuidv4();
+    console.log(FUNCTIONS_SETTINGS_LIST);
 
-    this.setState(prevState => {
-      const functions = prevState.functions;
-      functions.set(id, expression);
-      return {
-        functions,
-        expression: ""
-      };
-    });
+    if (!FUNCTIONS_SETTINGS_LIST.has(id)) {
+      this.setState(_ => {
+        FUNCTIONS_SETTINGS_LIST.set(id, {
+          settings: { id, expression, isRendered: false }
+        });
+        console.log(FUNCTIONS_SETTINGS_LIST);
+        return {
+          expression: "",
+          functions: FUNCTIONS_SETTINGS_LIST
+        };
+      });
+    }
+  };
+
+  updateFunction = (id, settings) => {
+    console.log("updateFunction", FUNCTIONS_SETTINGS_LIST, settings);
+    if (FUNCTIONS_SETTINGS_LIST.has(id)) {
+      this.setState(_ => {
+        FUNCTIONS_SETTINGS_LIST.set(id, { settings: { ...settings, id } });
+        console.log("after update", FUNCTIONS_SETTINGS_LIST, settings);
+        return {
+          expression: "",
+          functions: FUNCTIONS_SETTINGS_LIST
+        };
+      });
+    }
   };
 
   removeFunction = id => {
     this.setState(prevState => {
-      const functions = prevState.functions;
-      functions.delete(id);
+      FUNCTIONS_SETTINGS_LIST.delete(id);
       return {
-        functions
+        functions: FUNCTIONS_SETTINGS_LIST
       };
     });
   };
@@ -153,6 +185,63 @@ class Page extends React.Component {
                   </button>
                 </div>
               </div>
+              {this.state.localStorageReady && (
+                <div>
+                  <TextInput
+                    text={`${t("scene-name")}:`}
+                    value={this.state.sceneName}
+                    placeholder={t("scene-name")}
+                    onChange={e =>
+                      this.setState({
+                        sceneName: e.target.value
+                      })
+                    }
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-lg"
+                    onClick={() => {
+                      if (this.state.sceneName) {
+                        console.log(FUNCTIONS_SETTINGS_LIST);
+                        console.log([...FUNCTIONS_SETTINGS_LIST]);
+                        saveScene(this.state.sceneName, [
+                          ...FUNCTIONS_SETTINGS_LIST
+                        ]);
+                        this.setState({
+                          savedScenes: getStoredKeys()
+                        });
+                      }
+                    }}
+                  >
+                    {t("save-scene")}
+                  </button>
+                  <Dropdown
+                    label={`${t("load-scene")}:`}
+                    options={["empty", ...this.state.savedScenes]}
+                    onChange={e => {
+                      const sceneFunctionsWithSettings = loadScene(
+                        e.target.value
+                      );
+                      if (sceneFunctionsWithSettings) {
+                        // Mathbox.select("cartesian > *").remove();
+                        FUNCTIONS_SETTINGS_LIST.clear();
+                        sceneFunctionsWithSettings.forEach(([id, fn]) => {
+                          FUNCTIONS_SETTINGS_LIST.add(id, fn);
+                        });
+
+                        this.setState({
+                          functions: FUNCTIONS_SETTINGS_LIST,
+                          sceneName: e.target.value
+                        });
+                        console.log(this.state);
+                      }
+                      console.log(sceneFunctionsWithSettings);
+                      console.log(new Map(sceneFunctionsWithSettings));
+                    }}
+                  />
+                </div>
+              )}
+              <hr />
               <Checkbox
                 text={t("show-grid")}
                 onChange={() => {
@@ -266,6 +355,7 @@ class Page extends React.Component {
                     [0, this.state.zMax + 0.5, 0],
                     [0, 0, this.state.yMax + 0.5]
                   ]);
+                  console.log(this.state);
                 }}
               />
               <Slider
@@ -471,19 +561,20 @@ class Page extends React.Component {
               <hr />
               <ListGroup>
                 {Array.from(this.state.functions).map(
-                  ([id, expression]) =>
+                  ([id, fn]) =>
                     id && (
                       <FunctionSettingsContainer.Provider
                         initialSettings={{
                           id,
-                          expression,
-                          color: randomColor()
+                          expression: fn.settings.expression,
+                          ...fn.settings
                         }}
                         key={`key-${id}`}
                       >
                         <SettingsPanel
-                          functionIds={this.state.functions}
-                          addFunction={this.addFunction}
+                          functionsList={this.state.functions}
+                          onAdd={this.addFunction}
+                          onInitialUpdate={this.updateFunction}
                           onRemove={() => this.removeFunction(id)}
                         />
                       </FunctionSettingsContainer.Provider>

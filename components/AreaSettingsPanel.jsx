@@ -4,23 +4,24 @@ import uuidv4 from "uuid/v4";
 import { ChromePicker } from "react-color";
 import { Collapse, ListGroupItemHeading, ListGroupItem } from "reactstrap";
 import { InlineMath } from "react-katex";
+import randomColor from "randomcolor";
 import {
   Mathbox,
-  calculateFn,
+  calculateAreaFn,
   Scene,
   toTex,
   derivate,
   fnCache
-} from "../common/mathbox";
+} from "../utils/mathbox";
+import { draw3DFunction, swizzle } from "../utils/creators";
 import { Checkbox } from "./Checkbox";
 import { Slider } from "./Slider";
 import { TextInput } from "./TextInput";
 import ExpressionForm from "./ExpressionForm";
 import { Dropdown } from "./Dropdown";
 
+import { FUNCTIONS_SETTINGS_LIST } from "../helpers";
 import { withNamespaces } from "../i18n";
-
-const cache = new Set();
 
 const popover = {
   position: "absolute",
@@ -46,40 +47,95 @@ export const INITIAL_STATE = {
   lineY: false,
   blendingMode: "normal",
   expression: "x^2 + y^2",
-  id: uuidv4(),
+  id: `area-${uuidv4()}`,
   label: "",
-  color: "#509000",
+  color: randomColor(),
   visible: true,
   opacity: 1,
   displayColorPicker: false,
   panelOpen: false,
-  infillType: "surface"
+  infillType: "surface",
+  order: "xyzw"
 };
+
+function redraw(settings) {
+  Mathbox.select(`#${settings.id}`).set(
+    "expr",
+    calculateAreaFn(
+      settings.expression,
+      { min: settings.rangeZMin, max: settings.rangeZMax },
+      settings.limitZ
+    )
+  );
+}
+
+function autoSave(settings) {
+  if (settings && settings.id) {
+    console.log(settings);
+    FUNCTIONS_SETTINGS_LIST.set(settings.id, {
+      settings
+    });
+    console.log(FUNCTIONS_SETTINGS_LIST);
+  }
+  return settings;
+}
 
 function useFunctionSettings({ initialSettings }) {
   const [settings, updateSettings] = useState({
     ...INITIAL_STATE,
     ...initialSettings
   });
-  const update = props => updateSettings({ ...settings, ...props });
+
+  const update = props =>
+    updateSettings(
+      autoSave({
+        ...settings,
+        ...props
+      })
+    );
   const setColor = ({ hex }) => {
-    updateSettings({ ...settings, color: hex });
+    updateSettings(
+      autoSave({
+        ...settings,
+        color: hex
+      })
+    );
     Mathbox.select(`#surface-${settings.id}`).set("color", hex);
   };
   const setVisibility = visible => {
-    updateSettings({ ...settings, visible });
+    updateSettings(
+      autoSave({
+        ...settings,
+        visible
+      })
+    );
     Mathbox.select(`#surface-${settings.id}`).set("visible", visible);
   };
   const setOpacity = opacity => {
-    updateSettings({ ...settings, opacity });
+    updateSettings(
+      autoSave({
+        ...settings,
+        opacity
+      })
+    );
     Mathbox.select(`#surface-${settings.id}`).set("opacity", opacity);
   };
   const setBlendingMode = blendingMode => {
-    updateSettings({ ...settings, blendingMode });
+    updateSettings(
+      autoSave({
+        ...settings,
+        blendingMode
+      })
+    );
     Mathbox.select(`#surface-${settings.id}`).set("blending", blendingMode);
   };
   const setInfill = infillType => {
-    updateSettings({ ...settings, infillType });
+    updateSettings(
+      autoSave({
+        ...settings,
+        infillType
+      })
+    );
 
     switch (infillType) {
       case "points":
@@ -101,6 +157,55 @@ function useFunctionSettings({ initialSettings }) {
         break;
     }
   };
+  function updateRange(axis) {
+    if (typeof axis === "string") {
+      Mathbox.select(`#area-${settings.id}`).set(`range${axis}`, [
+        settings[`range${axis.toUpperCase()}Min`],
+        settings[`range${axis.toUpperCase()}Min`]
+      ]);
+
+      redraw(settings);
+    }
+  }
+
+  const setRangeXMax = val => {
+    update(autoSave({ rangeXMax: parseFloat(val) }));
+
+    updateRange("X");
+  };
+  const setRangeXMin = val => {
+    update(autoSave({ rangeXMin: parseFloat(val) }));
+
+    updateRange("X");
+  };
+  const setRangeYMax = val => {
+    update(autoSave({ rangeYMax: parseFloat(val) }));
+
+    updateRange("Y");
+  };
+  const setRangeYMin = val => {
+    update(autoSave({ rangeYMin: parseFloat(val) }));
+
+    updateRange("Y");
+  };
+
+  const swizzleFunctionAxes = order => {
+    if (
+      typeof order === "string" &&
+      order.includes("x") &&
+      order.includes("y") &&
+      order.includes("z")
+    ) {
+      updateSettings(
+        autoSave({
+          ...settings,
+          order
+        })
+      );
+
+      Mathbox.select(`#swizzle-${settings.id}`).set("order", order);
+    }
+  };
   return {
     settings,
     update,
@@ -108,13 +213,18 @@ function useFunctionSettings({ initialSettings }) {
     setVisibility,
     setOpacity,
     setBlendingMode,
-    setInfill
+    setInfill,
+    setRangeXMax,
+    setRangeXMin,
+    setRangeYMax,
+    setRangeYMin,
+    swizzleFunctionAxes
   };
 }
 
 export const FunctionSettingsContainer = createContainer(useFunctionSettings);
 
-function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
+function SettingsPanel({ onAdd, onInitialUpdate, onRemove, functionsList, t }) {
   const {
     settings,
     update,
@@ -122,69 +232,49 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
     setVisibility,
     setOpacity,
     setBlendingMode,
-    setInfill
+    setInfill,
+    setRangeXMax,
+    setRangeXMin,
+    setRangeYMax,
+    setRangeYMin,
+    swizzleFunctionAxes
   } = useContext(FunctionSettingsContainer.Context);
   // Handle componentDidMount and componentDidUnmount (cleanup)
   useEffect(() => {
-    if (functionIds.has(settings.id) && !cache.has(settings.id)) {
-      // Add current function ID to cache
-      cache.add(settings.id);
-      // Render function
-      Scene.area({
-        id: settings.id,
-        width: 100,
-        height: 100,
-        axes: [1, 3],
-        live: true,
-        rangeX: [-4, 4],
-        rangeY: [-4, 4],
-        expr: calculateFn(
-          settings.expression,
-          { min: settings.rangeZMin, max: settings.rangeZMax },
-          settings.limitZ
-        ),
-        channels: 3,
-        realtime: true
+    if (
+      settings &&
+      settings.id &&
+      FUNCTIONS_SETTINGS_LIST.has(settings.id) &&
+      !FUNCTIONS_SETTINGS_LIST.get(settings.id).settings.isRendered
+    ) {
+      console.log("is it working?");
+      onInitialUpdate(settings.id, { ...settings, isRendered: true });
+
+      draw3DFunction(settings);
+      swizzle({
+        id: `swizzle-${settings.id}`,
+        order: "xyzw",
+        source: `#area-${settings.id}`
       });
 
-      Scene.surface({
-        id: `surface-${settings.id}`,
-        lineX: settings.lineX,
-        lineY: settings.lineY,
-        color: settings.color,
-        width: 2,
-        shaded: true,
-        zBias: cache.values.length,
-        zOrder: cache.values.length,
-        blending: settings.blendingMode,
-        closed: true,
-        visible: settings.infillType === "surface"
-      });
-
-      Scene.point({
-        id: `points-${settings.id}`,
-        color: settings.color,
-        blending: settings.blendingMode,
-        visible: settings.infillType === "points"
-      });
-
-      Scene.line({
-        id: `lines-${settings.id}`,
-        color: settings.color,
-        zBias: cache.values.length,
-        zOrder: cache.values.length,
-        blending: settings.blendingMode,
-        visible: settings.infillType === "lines"
-      });
+      Mathbox.print();
 
       return function cleanup() {
-        if (cache.has(settings.id) && !functionIds.has(settings.id)) {
-          cache.delete(settings.id);
-          Mathbox.remove(`#${settings.id}`);
+        if (
+          FUNCTIONS_SETTINGS_LIST.has(settings.id) &&
+          FUNCTIONS_SETTINGS_LIST.get(settings.id).settings.isRendered
+        ) {
+          console.log(functionsList.size);
+          FUNCTIONS_SETTINGS_LIST.delete(settings.id);
+          Mathbox.remove(`#area-${settings.id}`);
+          Mathbox.remove(`#surface-${settings.id}`);
+          Mathbox.remove(`#points-${settings.id}`);
+          Mathbox.remove(`#lines-${settings.id}`);
+          Mathbox.remove(`#swizzle-${settings.id}`);
         }
       };
     }
-  }, [functionIds]);
+  }, [functionsList.size]);
 
   function handleClick() {
     update({ displayColorPicker: !settings.displayColorPicker });
@@ -192,6 +282,10 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
 
   function handleClose() {
     update({ displayColorPicker: false });
+  }
+
+  if (!settings || !settings.id) {
+    return "";
   }
 
   return (
@@ -245,8 +339,12 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
           <button
             className="btn btn-danger"
             onClick={() => {
-              window.confirm("Are you sure you wish to delete this item?") &&
+              if (
+                window.confirm("Are you sure you wish to delete this item?")
+              ) {
                 onRemove(settings.id);
+                Mathbox.remove(`#${settings.id}`);
+              }
             }}
           >
             <span className="glyphicon glyphicon-remove" />
@@ -263,15 +361,7 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
           }
           onSubmit={e => {
             e.preventDefault();
-
-            Mathbox.select(`#${settings.id}`).set(
-              "expr",
-              calculateFn(
-                settings.expression,
-                { min: settings.rangeZMin, max: settings.rangeZMax },
-                settings.limitZ
-              )
-            );
+            redraw(settings);
           }}
         />
         <TextInput
@@ -323,6 +413,11 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
           options={["normal", "add", "subtract", "multiply", "no"]}
           onChange={e => setBlendingMode(e.target.value)}
         />
+        <Dropdown
+          label={`${t("swizzle-axis")}:`}
+          options={["xyzw", "xzyw"]}
+          onChange={e => swizzleFunctionAxes(e.target.value)}
+        />
         <hr />
         <div>
           <p>{t("derivate")}:</p>
@@ -331,20 +426,20 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
             onClick={() => {
               const fn = fnCache.get(settings.expression);
               const dt = derivate(fn.parsedFn, "x");
-              addFunction(dt.toString());
+              onAdd(dt.toString());
             }}
           >
-            <InlineMath>{String.raw`\frac{\partial f}{\partial x}`}</InlineMath>
+            <InlineMath>{String.raw`\frac{\partial f(x, y)}{\partial x}`}</InlineMath>
           </button>
           <button
             className="btn btn-lg btn-outline-primary"
             onClick={() => {
               const fn = fnCache.get(settings.expression);
               const dt = derivate(fn.parsedFn, "y");
-              addFunction(dt.toString());
+              onAdd(dt.toString());
             }}
           >
-            <InlineMath>{String.raw`\frac{\partial f}{\partial y}`}</InlineMath>
+            <InlineMath>{String.raw`\frac{\partial f(x, y)}{\partial y}`}</InlineMath>
           </button>
         </div>
         <hr />
@@ -354,23 +449,7 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
           max="0"
           step="0.1"
           value={settings.rangeXMin}
-          onChange={val => {
-            update({ rangeXMin: parseFloat(val) });
-
-            Mathbox.select(`#${settings.id}`).set("rangeX", [
-              settings.rangeXMin,
-              settings.rangeXMax
-            ]);
-
-            Mathbox.select(`#${settings.id}`).set(
-              "expr",
-              calculateFn(
-                settings.expression,
-                { min: settings.rangeZMin, max: settings.rangeZMax },
-                settings.limitZ
-              )
-            );
-          }}
+          onChange={setRangeXMin}
         />
         <Slider
           text="X max"
@@ -378,23 +457,7 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
           max="100"
           step="0.1"
           value={settings.rangeXMax}
-          onChange={val => {
-            update({ rangeXMax: parseFloat(val) });
-
-            Mathbox.select(`#${settings.id}`).set("rangeX", [
-              settings.rangeXMin,
-              settings.rangeXMax
-            ]);
-
-            Mathbox.select(`#${settings.id}`).set(
-              "expr",
-              calculateFn(
-                settings.expression,
-                { min: settings.rangeZMin, max: settings.rangeZMax },
-                settings.limitZ
-              )
-            );
-          }}
+          onChange={setRangeXMax}
         />
         <Slider
           text="Y min"
@@ -402,23 +465,7 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
           max="0"
           step="0.1"
           value={settings.rangeYMin}
-          onChange={val => {
-            update({ rangeYMin: parseFloat(val) });
-
-            Mathbox.select(`#${settings.id}`).set("rangeY", [
-              settings.rangeYMin,
-              settings.rangeYMax
-            ]);
-
-            Mathbox.select(`#${settings.id}`).set(
-              "expr",
-              calculateFn(
-                settings.expression,
-                { min: settings.rangeZMin, max: settings.rangeZMax },
-                settings.limitZ
-              )
-            );
-          }}
+          onChange={setRangeYMin}
         />
         <Slider
           text="Y max"
@@ -426,37 +473,14 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
           max="100"
           step="0.1"
           value={settings.rangeYMax}
-          onChange={val => {
-            update({ rangeYMax: parseFloat(val) });
-
-            Mathbox.select(`#${settings.id}`).set("rangeY", [
-              settings.rangeYMin,
-              settings.rangeYMax
-            ]);
-
-            Mathbox.select(`#${settings.id}`).set(
-              "expr",
-              calculateFn(
-                settings.expression,
-                { min: settings.rangeZMin, max: settings.rangeZMax },
-                settings.limitZ
-              )
-            );
-          }}
+          onChange={setRangeYMax}
         />
         <Checkbox
           text={`${t("limit-z")}?`}
           onChange={e => {
             update({ limitZ: e.target.checked });
 
-            Mathbox.select(`#${settings.id}`).set(
-              "expr",
-              calculateFn(
-                settings.expression,
-                { min: settings.rangeZMin, max: settings.rangeZMax },
-                settings.limitZ
-              )
-            );
+            redraw(settings);
           }}
           checked={settings.limitZ}
         />
@@ -467,16 +491,8 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
           step="0.1"
           value={settings.rangeZMin}
           onChange={val => {
-            update({ rangeZMin: parseFloat(val) });
-
-            Mathbox.select(`#${settings.id}`).set(
-              "expr",
-              calculateFn(
-                settings.expression,
-                { min: settings.rangeZMin, max: settings.rangeZMax },
-                settings.limitZ
-              )
-            );
+            update(autoSave({ rangeZMin: parseFloat(val) }));
+            redraw(settings);
           }}
         />
         <Slider
@@ -486,16 +502,8 @@ function SettingsPanel({ addFunction, functionIds, t, onRemove }) {
           step="0.1"
           value={settings.rangeZMax}
           onChange={val => {
-            update({ rangeZMax: parseFloat(val) });
-
-            Mathbox.select(`#${settings.id}`).set(
-              "expr",
-              calculateFn(
-                settings.expression,
-                { min: settings.rangeZMin, max: settings.rangeZMax },
-                settings.limitZ
-              )
-            );
+            update(autoSave({ rangeZMax: parseFloat(val) }));
+            redraw(settings);
           }}
         />
       </Collapse>

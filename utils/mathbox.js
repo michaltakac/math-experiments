@@ -128,7 +128,7 @@ export function initScene(colors, opts) {
 export const fnCache = new Map();
 
 /**
- * Compiles and calculates given functin expression.
+ * Compiles and calculates area given function expression.
  *
  * @param {string} expr         - function expression
  * @param {Object} rangeZ       - object containing min and max limits on Z exis
@@ -137,7 +137,7 @@ export const fnCache = new Map();
  * @param {boolean} limitZ      - should take Z axis limit into account?
  * @returns {function} emitToScene
  */
-export function calculateFn(expr, rangeZ, limitZ) {
+export function calculateAreaFn(expr, rangeZ, limitZ) {
   let node = undefined;
   if (fnCache.has(expr)) {
     node = fnCache.get(expr).node;
@@ -147,7 +147,7 @@ export function calculateFn(expr, rangeZ, limitZ) {
     fnCache.set(expr, { parsedFn, node });
   }
 
-  return function emitToScene(emit, x, y, i, j) {
+  return function emitAreaData(emit, x, y, i, j) {
     const computedVal = computeFn(node, { x, y, i, j });
 
     if (computedVal < rangeZ.min) {
@@ -156,6 +156,31 @@ export function calculateFn(expr, rangeZ, limitZ) {
       limitZ && emit(x, rangeZ.max, y);
     } else {
       emit(x, computedVal, y);
+    }
+  };
+}
+
+/**
+ * Compiles and calculates given interval function expression.
+ *
+ * @param {string} expr         - function expression
+ * @returns {function} emitToScene
+ */
+export function calculateIntervalFn(expr) {
+  let node = undefined;
+  if (fnCache.has(expr)) {
+    node = fnCache.get(expr).node;
+  } else {
+    const parsedFn = parseFn(expr);
+    node = parsedFn.compile();
+    fnCache.set(expr, { parsedFn, node });
+  }
+
+  return function emitIntervalData(emit, x, y, i, j) {
+    const computedVal = computeFn(node, { x, y, i, j });
+
+    if (!Number.isNaN(computedVal)) {
+      emit(x, 0, computedVal);
     }
   };
 }

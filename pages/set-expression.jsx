@@ -4,7 +4,7 @@ import Head from "next/head";
 import { Checkbox } from "../components/Checkbox";
 import { Slider } from "../components/Slider";
 import { ExpressionForm } from "../components/ExpressionForm";
-import { Mathbox, initMathBox } from "../common/mathbox";
+import { Mathbox, initMathBox } from "../utils/mathbox";
 
 import { withNamespaces } from "../i18n";
 class Page extends React.Component {

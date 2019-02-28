@@ -3,7 +3,7 @@ import math from "mathjs";
 import Head from "next/head";
 import { Checkbox } from "../components/Checkbox";
 import { Slider } from "../components/Slider";
-import { initMathBox, Mathbox } from "../common/mathbox";
+import { initMathBox, Mathbox } from "../utils/mathbox";
 
 import { withNamespaces } from "../i18n";
 class Page extends React.Component {

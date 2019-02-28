@@ -27,5 +27,10 @@
   "derivate": "Derivate",
   "blending-mode": "Blending mode",
   "limit-z": "Limit Z-axis?",
-  "infill": "Infill"
+  "infill": "Infill",
+  "save-scene": "Save scene",
+  "load-scene": "Load scene",
+  "clear-scene": "Clear scene",
+  "scene-name": "Scene name",
+  "swizzle-axis": "Swizzle axes"
 }
